@@ -1,0 +1,98 @@
+==  Templatizing Puppet
+
+This is an example of how to use puppet templates to create dynamic puppet moddules.  The big keys are:
+
+* You can use ERB templates to customize files
+* Puppet comes with some pre-defined variables.  You can get this list by running "facter" at the command line
+* Templates (and files, for that matter) should live in a module so that puppet can find them.  Otherwise, you have to use absolute paths.
+* The templates must live in a file called "templates" within a module
+* The template is executed by a file resource
+* The location path of the template is different than the structure for a file.
+
+This example shows how to templatize an apache conf file. Here's the manifest.  The rest of the example is mostly around putting things in the right directory structure that puppet expects.
+
+----
+#
+# Example of how to move a static file
+#
+file { '/tmp/static.conf':
+   ensure => file,
+   mode => '644',
+   source => "puppet:///modules/apache_setup/001-atlas-admin.oreilly.com.conf",
+}
+
+
+#
+# Example of dynamic template
+#
+file { '/tmp/dynamic.conf':
+   ensure => file,
+   mode => '644',
+   content => template("apache_setup/001-atlas-admin.oreilly.com.conf.erb")
+}
+----
+
+
+== Available variables
+
+To see the list of variables, run "facter" at the command line:
+
+----
+$ facter
+architecture => amd64
+domain => west.ora.com
+facterversion => 1.6.9
+fqdn => lucid64.west.ora.com
+hardwareisa => unknown
+hardwaremodel => x86_64
+hostname => lucid64
+id => vagrant
+interfaces => eth0,lo
+ipaddress => 10.0.2.15
+ipaddress_eth0 => 10.0.2.15
+ipaddress_lo => 127.0.0.1
+is_virtual => true
+kernel => Linux
+kernelmajversion => 2.6
+kernelrelease => 2.6.32-38-server
+kernelversion => 2.6.32
+lsbdistcodename => lucid
+lsbdistdescription => Ubuntu 10.04.4 LTS
+lsbdistid => Ubuntu
+lsbdistrelease => 10.04
+lsbmajdistrelease => 10
+macaddress => 08:00:27:6d:fe:ec
+macaddress_eth0 => 08:00:27:6d:fe:ec
+memoryfree => 300.27 MB
+memorysize => 367.26 MB
+memorytotal => 367.26 MB
+netmask => 255.255.255.0
+netmask_eth0 => 255.255.255.0
+netmask_lo => 255.0.0.0
+network_eth0 => 10.0.2.0
+network_lo => 127.0.0.0
+operatingsystem => Ubuntu
+operatingsystemrelease => 10.04
+osfamily => Debian
+path => /usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games:/opt/vagrant_ruby/bin
+physicalprocessorcount => 1
+processor0 => Intel(R) Core(TM) i5-2557M CPU @ 1.70GHz
+processor1 => Intel(R) Core(TM) i5-2557M CPU @ 1.70GHz
+processorcount => 2
+ps => ps -ef
+puppetversion => 2.7.14
+rubysitedir => /opt/vagrant_ruby/lib/ruby/site_ruby/1.8
+rubyversion => 1.8.7
+selinux => false
+sshdsakey => AAAAB3NzaC1kc3MAAACBAJti+9to8mcg3LQtvojhUbDNWMMx8gF/0fohj+ehO6TUMBZm9XIG77uPwizGdMMKqSIGVzBwDRGkzgBuF9H2aObrLeWrpPvetWnzT2sWbAydTPMJZsc5bYVnpWu6V48oWv84ipP2m93iq+tKxjncR5J0n0WY5eIellKemv5ql1LLAAAAFQDlw61IB4qXqbG+1L+5Z8W0BW90qwAAAIAfOnTN9qJvqXJWiqQvrh5LKhNK7QX9GNiFdTLypk4hfCOgkWw/2+GUgQ7PyvwrQUaTgaF6WWmG9vddmUwk9qoMIZGF37iHUtD+6OmHIK33inOe4gkHz6kZi3pD1v2pIT+IX7TjVb+AwNXxics1T2aa/fcsq1hFRsqiPFD0mdqxIgAAAIA54eW9q/g7ywFswDALGQ/xxphoMGHQDciC+lAEfpsA3nXqF0XWYuPDb7wWFyvMrATx4GRV1KufHsZM2+ZLPJ8Y72PyK7at0PO2MVuNh/MxLMSoUYXtpBi6NqGcS4+rQgnhaulWXKsBOQ/81Df30PFGXAudCToQMld5KV6m3nvTLw==
+sshrsakey => AAAAB3NzaC1yc2EAAAABIwAAAQEAuWwa3DYkX0fu0futn6+k0KMnt+rNJOpHcIoFwhZ6eiDni+SA9a2hFai0L7sG9w8QuNTaLHbW+7EEA59y98BX1yWnB+72SKiXt/nWryavATFegIyUgaY8KI6VJ5CwHsLeTtT5+aRceW4t5Cu+HMpKSv/7u6cdMErvNeMf7wFt+IVmN217SRRTfxJsbeaYWF+nCLnNMPFxBaKAkG7463T0lbSw3ccl11h8xpwRpOCL8Cs0/ZiLEADne5Zugz7OaIRxkfPSeeszqAnTgd2p3ETf+zV8S9XuVTYpF7tFiYN2ax36/RBR4Bj6BWkLQgaD/hjpzK4FI3kfKe6kJTGtnhgrfQ==
+swapfree => 1.05 GB
+swapsize => 1.05 GB
+timezone => CEST
+uniqueid => 007f0101
+uptime => 0:30 hours
+uptime_days => 0
+uptime_hours => 0
+uptime_seconds => 1837
+virtual => virtualbox
+----

@@ -1,0 +1,46 @@
+<VirtualHost *:80>
+   ServerName atlas-admin.oreilly.com
+   RewriteEngine On
+   RewriteRule ^/(.*)$ https://atlas-admin.oreilly.com/$1 [R=301,L,NE]
+   ErrorLog /var/log/apache2/atlas-admin.log
+   LogLevel warn
+   CustomLog /var/log/apache2/atlas-admin.log combined
+</VirtualHost>
+
+
+<VirtualHost <%= @ipaddress %>:443>
+   ServerName atlas-admin.oreilly.com
+   DocumentRoot /var/www
+
+   SSLEngine On
+   SSLCertificateFile /etc/apache2/ssl/atlas-admin.oreilly.com.crt
+   SSLCertificateKeyFile /etc/apache2/ssl/atlas-admin.oreilly.com.key
+   SSLCACertificateFile /etc/apache2/ssl/gd_bundle.crt
+
+   RewriteEngine On
+   ProxyPassReverse    /gitapi/	http://127.0.0.1:9995/gitapi
+   ProxyPassReverse    /git		http://127.0.0.1:9995/git
+   RewriteRule	^/gitapi/(.*)$	http://127.0.0.1:9995/gitapi/$1 [P,L]
+   RewriteRule	^/git/(.*)$		http://127.0.0.1:9995/git/$1 [P,L]
+
+
+   Timeout 5400
+   ProxyTimeout 5400
+
+   ErrorLog /var/log/apache2/atlas-admin.log
+
+   # Possible values include: debug, info, notice, warn, error, crit,
+   # alert, emerg.
+   LogLevel warn
+
+   CustomLog /var/log/apache2/atlas-admin.log combined
+
+   <Location "/git/">
+     Order deny,allow
+     AuthBasicAuthoritative Off
+     AuthUserFile /dev/null 
+     AuthType Basic
+     AuthName "Please log in:"
+   </Location>
+
+</VirtualHost>
